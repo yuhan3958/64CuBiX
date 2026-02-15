@@ -1,0 +1,65 @@
+package me.cubix.ui;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public final class WorldStorage {
+    private final Path savesDir = Paths.get("saves");
+
+    public void ensure() throws IOException {
+        Files.createDirectories(savesDir);
+    }
+
+    public List<WorldInfo> listWorlds() throws IOException {
+        if (!Files.exists(savesDir)) return List.of();
+        try (var stream = Files.list(savesDir)) {
+            List<Path> dirs = stream.filter(Files::isDirectory).collect(Collectors.toList());
+            List<WorldInfo> out = new ArrayList<>();
+            for (Path dir : dirs) {
+                Path meta = dir.resolve("meta.properties");
+                if (!Files.exists(meta)) continue;
+
+                Properties p = new Properties();
+                try (var in = Files.newInputStream(meta)) { p.load(in); }
+
+                String id = dir.getFileName().toString();
+                String name = p.getProperty("name", id);
+                long seed = Long.parseLong(p.getProperty("seed", "0"));
+                out.add(new WorldInfo(id, name, seed));
+            }
+            out.sort(Comparator.comparing(WorldInfo::name));
+            return out;
+        }
+    }
+
+    public WorldInfo createWorld(String name, long seed) throws IOException {
+        ensure();
+        String id = UUID.randomUUID().toString();
+        Path dir = savesDir.resolve(id);
+        Files.createDirectories(dir);
+
+        Properties p = new Properties();
+        p.setProperty("name", name);
+        p.setProperty("seed", Long.toString(seed));
+        p.setProperty("createdAt", Long.toString(System.currentTimeMillis()));
+
+        try (var out = Files.newOutputStream(dir.resolve("meta.properties"))) {
+            p.store(out, "world meta");
+        }
+        return new WorldInfo(id, name, seed);
+    }
+
+    public void deleteWorld(WorldInfo info) throws IOException {
+        Path dir = savesDir.resolve(info.id());
+        if (!Files.exists(dir)) return;
+
+        try (var walk = Files.walk(dir)) {
+            walk.sorted(Comparator.reverseOrder()).forEach(p -> {
+                try { Files.deleteIfExists(p); }
+                catch (IOException e) { throw new RuntimeException(e); }
+            });
+        }
+    }
+}
