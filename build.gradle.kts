@@ -30,11 +30,13 @@ dependencies {
     implementation("org.lwjgl:lwjgl-glfw")
     implementation("org.lwjgl:lwjgl-opengl")
     implementation("org.lwjgl:lwjgl-nuklear")
+    implementation("org.lwjgl:lwjgl-stb")
 
     runtimeOnly("org.lwjgl:lwjgl::$natives")
     runtimeOnly("org.lwjgl:lwjgl-glfw::$natives")
     runtimeOnly("org.lwjgl:lwjgl-opengl::$natives")
     runtimeOnly("org.lwjgl:lwjgl-nuklear::$natives")
+    runtimeOnly("org.lwjgl:lwjgl-stb::$natives")
 
     implementation("org.joml:joml:1.10.6")
 }
