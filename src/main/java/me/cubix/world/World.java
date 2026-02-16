@@ -36,7 +36,7 @@ public final class World {
         c.markDirty();
     }
 
-    private Chunk getOrCreateChunk(int cx, int cy, int cz) {
+    public Chunk getOrCreateChunk(int cx, int cy, int cz) {
         ChunkPos p = new ChunkPos(cx, cy, cz);
         Chunk c = chunks.get(p);
         if (c != null) return c;
@@ -64,5 +64,9 @@ public final class World {
     public WorldInfo info() { return info; }
 
     public Map<ChunkPos, Chunk> chunksView() { return java.util.Collections.unmodifiableMap(chunks); }
+
+    public int chunkSize() {
+        return Chunk.S;
+    }
 }
 

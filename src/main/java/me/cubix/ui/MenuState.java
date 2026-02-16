@@ -1,7 +1,5 @@
 package me.cubix.ui;
 
-import me.cubix.world.World;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,4 +17,5 @@ public final class MenuState {
     public String newWorldSeed = String.valueOf(new Random().nextLong());
 
     public int pendingDelete = -1;
+    public int playerHeight = 175;
 }

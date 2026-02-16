@@ -1,11 +1,11 @@
-package me.cubix.gfx.test;
+package me.cubix.gfx.model;
 
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-public final class TestCube {
+public final class Cube {
     public record Built(FloatBuffer verts, IntBuffer inds) {}
 
     public static Built build(int tile, int atlasSize, int tileSize) {
@@ -54,5 +54,5 @@ public final class TestCube {
         v.put(x).put(y).put(z).put(u).put(w);
     }
 
-    private TestCube() {}
+    private Cube() {}
 }

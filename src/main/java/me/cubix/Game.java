@@ -1,17 +1,29 @@
 package me.cubix;
 
 import me.cubix.core.Window;
+import me.cubix.gameplay.Player;
 import me.cubix.gfx.Renderer3D;
+import me.cubix.phys.PlayerPhysicsState;
 import me.cubix.ui.*;
 import me.cubix.world.World;
-import me.cubix.world.save.WorldStorage;
+import org.joml.Vector3f;
 
 import java.io.IOException;
 
 import static me.cubix.world.save.WorldStorage.saveDirtyChunks;
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.nuklear.Nuklear.NK_KEY_RIGHT;
+import static org.lwjgl.nuklear.Nuklear.nk_input_key;
 
 public final class Game {
+
+    private boolean JUMPDown = false;
+
+    private boolean JUMPFiredOnce = false;
+
+    private double JUMPPressedAt = 0.0;
+
+    private double JUMPLastRepeatAt = 0.0;
 
     private World world; // 현재 플레이 중인 월드. 메뉴 상태면 null
 
@@ -31,6 +43,11 @@ public final class Game {
     private final MenuState menuState = new MenuState();
     private GameMenu menu;
 
+    private final Vector3f lastCam = new Vector3f();
+    private final Vector3f desiredDelta = new Vector3f();
+
+    private final Player player = new Player();
+
     public void run() {
         window = new Window(1280, 720, "64cubix");
         window.init();
@@ -46,8 +63,8 @@ public final class Game {
                 System.out.println("[MENU] Start world: " + world.name() + " seed=" + world.seed());
                 World w = new World(world.seed(), world);
                 w.getBlock(0, 0, 0);
-                state = State.PLAY;
                 setWorld(w);
+                state = State.PLAY;
                 glfwSetInputMode(window.handle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
             @Override public void backToMenu() {
@@ -59,6 +76,7 @@ public final class Game {
             }
         });
 
+
         glfwSetInputMode(window.handle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
         loop();
@@ -69,11 +87,10 @@ public final class Game {
     }
 
     private void loop() {
-        double last = window.time();
         while (!window.shouldClose()) {
-            double now = window.time();
-            float dt = (float)(now - last);
-            last = now;
+            float dt=1/60f;
+
+            float playerHeight=menu.s.playerHeight/100f;
 
             ui.beginInput();
 
@@ -88,12 +105,12 @@ public final class Game {
             }
 
             if (state == State.PLAY) {
-                // TODO: 플레이 구현
+
                 if (glfwGetKey(window.handle(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
                     World w = world();
                     if (w != null) {
                         try {
-                            WorldStorage.saveDirtyChunks(w);
+                            saveDirtyChunks(w);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -106,7 +123,36 @@ public final class Game {
                 }
             }
 
-            renderer3D.render(dt, world());
+            renderer3D.render(dt, world);
+
+            desiredDelta.set(renderer3D.camera.position).sub(lastCam); // 카메라가 가고 싶었던 이동량
+
+            desiredDelta.y=0f;
+
+            player.vel.y -= player.gravity * dt;
+
+            if (player.onGround && hasJump()) {
+                player.vel.y = player.jumpSpeed;
+                player.onGround = false;
+            }
+
+            Vector3f delta = new Vector3f(
+                    desiredDelta.x,
+                    player.vel.y * dt,
+                    desiredDelta.z
+            );
+
+            player.moveAndCollide(world, delta, playerHeight);
+
+            if (player.onGround && player.vel.y < 0f) {
+                player.vel.y = 0f;
+            }
+
+            renderer3D.camera.position.set(player.pos.x,
+                    player.pos.y + playerHeight,
+                    player.pos.z);
+
+            lastCam.set(renderer3D.camera.position);
 
             // UI frame
             ui.beginDraw(window.width(), window.height());
@@ -120,5 +166,36 @@ public final class Game {
 
             window.swapBuffers();
         }
+    }
+
+    private boolean hasJump() {
+        boolean down = glfwGetKey(window.handle(), GLFW_KEY_SPACE) == GLFW_PRESS;
+        double t = glfwGetTime();
+
+        final double initialDelay = 0.35;
+        final double repeatInterval = 0.3;
+
+        if (down) {
+            if (!JUMPDown) {
+                JUMPDown = true;
+                JUMPFiredOnce = true;
+                JUMPPressedAt = t;
+                JUMPLastRepeatAt = t;
+
+                return true;
+            }
+
+            if ((t - JUMPPressedAt) >= initialDelay) {
+                if ((t - JUMPLastRepeatAt) >= repeatInterval) {
+                    JUMPLastRepeatAt = t;
+                    return true;
+                }
+            }
+        } else {
+            JUMPDown = false;
+            JUMPFiredOnce = false;
+            return false;
+        }
+        return false;
     }
 }

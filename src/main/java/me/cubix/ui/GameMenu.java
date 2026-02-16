@@ -12,7 +12,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.nuklear.Nuklear.*;
 
 public final class GameMenu {
-    private final MenuState s;
+    public final MenuState s;
     private final MenuActions actions;
     private final WorldInfoStorage storage = new WorldInfoStorage();
 
@@ -221,6 +221,12 @@ public final class GameMenu {
 
         nk_layout_row_dynamic(ctx, 24, 1);
         s.mouseSensitivity = nk_slide_float(ctx, 0.02f, s.mouseSensitivity, 0.40f, 0.01f);
+
+        nk_layout_row_dynamic(ctx, 24, 1);
+        nk_label(ctx, "플레이어 키: " + s.playerHeight, NK_TEXT_LEFT);
+        nk_layout_row_dynamic(ctx, 24, 1);
+        s.playerHeight = nk_slide_int(ctx, 100, s.playerHeight, 200, 5);
+
 
         nk_layout_row_dynamic(ctx, 36, 1);
         if (nk_button_label(ctx, BACK)) {
