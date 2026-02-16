@@ -62,7 +62,17 @@ public final class Game {
             float dt = (float)(now - last);
             last = now;
 
+            ui.beginInput();
+
             window.pollEvents();
+
+            ui.endInput();
+
+            if (state == state.MENU) {
+                if (glfwGetKey(window.handle(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+                    menu.menuBack();
+                }
+            }
 
             if (state == State.PLAY) {
                 // TODO: 플레이 구현
@@ -75,15 +85,14 @@ public final class Game {
             renderer3D.render(dt);
 
             // UI frame
-            ui.beginFrame(window.width(), window.height());
+            ui.beginDraw(window.width(), window.height());
 
             if (state == State.MENU) {
                 menu.draw(ui.ctx(), window.width(), window.height());
             } else {
 
             }
-
-            ui.endFrame();
+            ui.endDraw();
 
             window.swapBuffers();
         }

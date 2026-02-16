@@ -27,6 +27,7 @@ public final class Window {
         handle = glfwCreateWindow(width, height, title, NULL, NULL);
         if (handle == NULL) throw new IllegalStateException("Window create failed");
 
+        glfwSetInputMode(handle, GLFW_STICKY_KEYS, GLFW_TRUE);
         glfwMakeContextCurrent(handle);
         glfwSwapInterval(1);
         glfwShowWindow(handle);

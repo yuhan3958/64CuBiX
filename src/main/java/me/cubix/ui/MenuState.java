@@ -2,6 +2,7 @@ package me.cubix.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public final class MenuState {
     public MenuScreen screen = MenuScreen.MAIN;
@@ -12,8 +13,8 @@ public final class MenuState {
     public final List<WorldInfo> worlds = new ArrayList<>();
     public int selectedWorld = -1;
 
-    public String newWorldName = "New World";
-    public String newWorldSeed = "12345";
+    public String newWorldName = "새로운 세계";
+    public String newWorldSeed = String.valueOf(new Random().nextLong());
 
     public int pendingDelete = -1;
 }

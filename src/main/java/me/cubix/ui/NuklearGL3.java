@@ -8,6 +8,8 @@ import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
@@ -57,6 +59,33 @@ public final class NuklearGL3 {
 
     public NkContext ctx() { return ctx; }
 
+    //backSpace
+    private boolean backDown = false;
+
+    private boolean backFiredOnce = false;
+
+    private double backPressedAt = 0.0;
+
+    private double backLastRepeatAt = 0.0;
+
+    //Left
+    private boolean LeftDown = false;
+
+    private boolean LeftFiredOnce = false;
+
+    private double LeftPressedAt = 0.0;
+
+    private double LeftLastRepeatAt = 0.0;
+
+    //Right
+    private boolean RightDown = false;
+
+    private boolean RightFiredOnce = false;
+
+    private double RightPressedAt = 0.0;
+
+    private double RightLastRepeatAt = 0.0;
+
     public void init() {
         ctx = NkContext.create();
         cmds = NkBuffer.create();
@@ -81,21 +110,40 @@ public final class NuklearGL3 {
             }
         });
 
-        setupFont();
-        setupGL();
-        setupCallbacks();
-        setupConvertConfig();
+        try {
+            setupFont();
+            setupGL();
+            setupCallbacks();
+            setupConvertConfig();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void setupFont() {
+    private static ByteBuffer loadResource(String path) throws IOException {
+        try (var in = NuklearGL3.class.getClassLoader().getResourceAsStream(path)) {
+            if (in == null) throw new FileNotFoundException("Resource not found: " + path);
+            byte[] bytes = in.readAllBytes();
+            ByteBuffer buf = org.lwjgl.system.MemoryUtil.memAlloc(bytes.length);
+            buf.put(bytes).flip();
+            return buf;
+        }
+    }
+
+    private void setupFont() throws IOException {
         nk_font_atlas_init(atlas, ALLOCATOR);
         nk_font_atlas_begin(atlas);
 
-        NkFont font = nk_font_atlas_add_default(atlas, 18, null);
-
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer w = stack.mallocInt(1);
-            IntBuffer h = stack.mallocInt(1);
+            NkFontConfig cfg = NkFontConfig.malloc(stack);
+            nk_font_config(18.0f, cfg);
+            cfg.range(Objects.requireNonNull(nk_font_korean_glyph_ranges()));
+
+            ByteBuffer ttf = loadResource("font/NotoSansKR-VariableFont_wght.ttf");
+            NkFont font = nk_font_atlas_add_from_memory(atlas, ttf, 18.0f, cfg);
+            if (font == null) throw new IllegalStateException("Font load failed: returned null");
+
+            IntBuffer w = stack.mallocInt(1), h = stack.mallocInt(1);
             ByteBuffer img = nk_font_atlas_bake(atlas, w, h, NK_FONT_ATLAS_RGBA32);
 
             fontTex = glGenTextures();
@@ -104,12 +152,16 @@ public final class NuklearGL3 {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w.get(0), h.get(0), 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
 
-            NkHandle fontHandle = NkHandle.create();
+            NkHandle fontHandle = NkHandle.malloc(stack);
             nk_handle_id(fontTex, fontHandle);
             nk_font_atlas_end(atlas, fontHandle, nullTex);
-            nk_style_set_font(ctx, Objects.requireNonNull(font).handle());
+
+            nk_style_set_font(ctx, font.handle());
+
+            org.lwjgl.system.MemoryUtil.memFree(ttf);
         }
     }
+
 
     private void setupGL() {
         // shaders
@@ -231,36 +283,34 @@ public final class NuklearGL3 {
         convertConfig.line_AA(NK_ANTI_ALIASING_OFF);
     }
 
-    public void beginFrame(int width, int height) {
-        this.fbWidth = width;
-        this.fbHeight = height;
-
+    public void beginInput() {
         nk_input_begin(ctx);
+    }
 
-        // mouse
+    public void endInput() {
+        // mouse + keyboard 상태를 여기서 ctx에 넣기
         try (MemoryStack stack = MemoryStack.stackPush()) {
             DoubleBuffer mx = stack.mallocDouble(1);
             DoubleBuffer my = stack.mallocDouble(1);
             glfwGetCursorPos(window, mx, my);
 
-            int x = (int)mx.get(0);
-            int y = (int)my.get(0);
+            int x = (int) mx.get(0);
+            int y = (int) my.get(0);
 
             nk_input_motion(ctx, x, y);
-
-            nk_input_button(ctx, NK_BUTTON_LEFT, x, y,
-                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
-            nk_input_button(ctx, NK_BUTTON_RIGHT, x, y,
-                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
-            nk_input_button(ctx, NK_BUTTON_MIDDLE, x, y,
-                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS);
+            nk_input_button(ctx, NK_BUTTON_LEFT, x, y, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+            nk_input_button(ctx, NK_BUTTON_RIGHT, x, y, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
+            nk_input_button(ctx, NK_BUTTON_MIDDLE, x, y, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS);
         }
 
-        // keyboard (필수 키만)
         nk_input_key(ctx, NK_KEY_ENTER, glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS);
         nk_input_key(ctx, NK_KEY_TAB, glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS);
-        nk_input_key(ctx, NK_KEY_BACKSPACE, glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS);
+        handleBackspaceRepeat();
         nk_input_key(ctx, NK_KEY_DEL, glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS);
+        handleLeftRepeat();
+        handleRightRepeat();
+        nk_input_key(ctx, NK_KEY_UP, glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
+        nk_input_key(ctx, NK_KEY_DOWN, glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
 
         boolean ctrl = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
                 glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
@@ -268,13 +318,16 @@ public final class NuklearGL3 {
         nk_input_key(ctx, NK_KEY_COPY, ctrl && glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS);
         nk_input_key(ctx, NK_KEY_PASTE, ctrl && glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS);
         nk_input_key(ctx, NK_KEY_CUT, ctrl && glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS);
-        nk_input_key(ctx, NK_KEY_TEXT_UNDO, ctrl && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS);
-        nk_input_key(ctx, NK_KEY_TEXT_REDO, ctrl && glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS);
 
         nk_input_end(ctx);
     }
 
-    public void endFrame() {
+    public void beginDraw(int width, int height) {
+        this.fbWidth = width;
+        this.fbHeight = height;
+    }
+
+    public void endDraw() {
         render();
         nk_clear(ctx);
     }
@@ -408,4 +461,104 @@ public final class NuklearGL3 {
     private static final NkAllocator ALLOCATOR = NkAllocator.create()
             .alloc((handle, old, size) -> MemoryUtil.nmemAllocChecked(size))
             .mfree((handle, ptr) -> MemoryUtil.nmemFree(ptr));
+
+    private void handleBackspaceRepeat() {
+        boolean down = glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS;
+        double t = glfwGetTime();
+
+        final double initialDelay = 0.35;   // 길게 누를 때 첫 반복까지 기다림(초)
+        final double repeatInterval = 0.03; // 반복 간격(초) -> 0.03이면 초당 약 33자
+
+        if (down) {
+            if (!backDown) {
+                // 딱 1번만 삭제
+                backDown = true;
+                backFiredOnce = true;
+                backPressedAt = t;
+                backLastRepeatAt = t;
+
+                nk_input_key(ctx, NK_KEY_BACKSPACE, true);
+                nk_input_key(ctx, NK_KEY_BACKSPACE, false);
+                return;
+            }
+
+            // initialDelay 이후부터 repeatInterval마다 1번씩만 삭제
+            if ((t - backPressedAt) >= initialDelay) {
+                if ((t - backLastRepeatAt) >= repeatInterval) {
+                    backLastRepeatAt = t;
+                    nk_input_key(ctx, NK_KEY_BACKSPACE, true);
+                    nk_input_key(ctx, NK_KEY_BACKSPACE, false);
+                }
+            }
+        } else {
+            backDown = false;
+            backFiredOnce = false;
+        }
+    }
+
+    private void handleLeftRepeat() {
+        boolean down = glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
+        double t = glfwGetTime();
+
+        final double initialDelay = 0.35;   // 길게 누를 때 첫 반복까지 기다림(초)
+        final double repeatInterval = 0.03; // 반복 간격(초) -> 0.03이면 초당 약 33자
+
+        if (down) {
+            if (!LeftDown) {
+                // 딱 1번만 삭제
+                LeftDown = true;
+                LeftFiredOnce = true;
+                LeftPressedAt = t;
+                LeftLastRepeatAt = t;
+
+                nk_input_key(ctx, NK_KEY_LEFT, true);
+                nk_input_key(ctx, NK_KEY_LEFT, false);
+                return;
+            }
+
+            // initialDelay 이후부터 repeatInterval마다 1번씩만 삭제
+            if ((t - LeftPressedAt) >= initialDelay) {
+                if ((t - LeftLastRepeatAt) >= repeatInterval) {
+                    LeftLastRepeatAt = t;
+                    nk_input_key(ctx, NK_KEY_LEFT, true);
+                    nk_input_key(ctx, NK_KEY_LEFT, false);
+                }
+            }
+        } else {
+            LeftDown = false;
+            LeftFiredOnce = false;
+        }
+    }
+
+    private void handleRightRepeat() {
+        boolean down = glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
+        double t = glfwGetTime();
+
+        final double initialDelay = 0.35;
+        final double repeatInterval = 0.03;
+
+        if (down) {
+            if (!RightDown) {
+                RightDown = true;
+                RightFiredOnce = true;
+                RightPressedAt = t;
+                RightLastRepeatAt = t;
+
+                nk_input_key(ctx, NK_KEY_RIGHT, true);
+                nk_input_key(ctx, NK_KEY_RIGHT, false);
+                return;
+            }
+
+            if ((t - RightPressedAt) >= initialDelay) {
+                if ((t - RightLastRepeatAt) >= repeatInterval) {
+                    RightLastRepeatAt = t;
+                    nk_input_key(ctx, NK_KEY_RIGHT, true);
+                    nk_input_key(ctx, NK_KEY_RIGHT, false);
+                }
+            }
+        } else {
+            RightDown = false;
+            RightFiredOnce = false;
+        }
+    }
 }
