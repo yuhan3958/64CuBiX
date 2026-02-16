@@ -1,11 +1,12 @@
 package me.cubix.ui;
 
+import me.cubix.world.World;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.nuklear.*;
 import org.lwjgl.system.MemoryStack;
 import java.nio.ByteBuffer;
+import me.cubix.world.block.BlockId;
 
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.nuklear.Nuklear.*;
@@ -13,7 +14,7 @@ import static org.lwjgl.nuklear.Nuklear.*;
 public final class GameMenu {
     private final MenuState s;
     private final MenuActions actions;
-    private final WorldStorage storage = new WorldStorage();
+    private final WorldInfoStorage storage = new WorldInfoStorage();
 
     private final ByteBuffer nameBuf = BufferUtils.createByteBuffer(64);
     private final IntBuffer nameLen = BufferUtils.createIntBuffer(1);
@@ -157,8 +158,18 @@ public final class GameMenu {
             long seed = parseSeed(seedText);
 
             try {
-                storage.createWorld(name, seed);
+                WorldInfo info = storage.createWorld(name, seed);
                 refreshWorlds();
+                World world = new World(seed, info);
+                for (int z = -16; z <= 16; z++) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int x = -32; x <= 32; x++) {
+                        int y = 80;
+                        while (y > 0 && world.getBlock(x, y, z) == BlockId.AIR) y--;
+                        sb.append(y < 10 ? " ." : y < 20 ? " -" : y < 30 ? " +" : " #");
+                    }
+                    System.out.println(sb);
+                }
                 s.screen = MenuScreen.SINGLEPLAYER;
             } catch (Exception e) {
                 e.printStackTrace();

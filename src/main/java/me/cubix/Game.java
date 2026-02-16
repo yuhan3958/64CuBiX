@@ -3,10 +3,21 @@ package me.cubix;
 import me.cubix.core.Window;
 import me.cubix.gfx.Renderer3D;
 import me.cubix.ui.*;
+import me.cubix.world.World;
+import me.cubix.world.save.WorldStorage;
 
+import java.io.IOException;
+
+import static me.cubix.world.save.WorldStorage.saveDirtyChunks;
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class Game {
+
+    private World world; // 현재 플레이 중인 월드. 메뉴 상태면 null
+
+    public World world() { return world; }
+
+    public void setWorld(World w) { this.world = w; }
 
     private enum State { MENU, PLAY }
 
@@ -33,8 +44,10 @@ public final class Game {
         menu = new GameMenu(menuState, new MenuActions() {
             @Override public void startSingleplayer(WorldInfo world) {
                 System.out.println("[MENU] Start world: " + world.name() + " seed=" + world.seed());
-                // TODO: 월드 생성
+                World w = new World(world.seed(), world);
+                w.getBlock(0, 0, 0);
                 state = State.PLAY;
+                setWorld(w);
                 glfwSetInputMode(window.handle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
             @Override public void backToMenu() {
@@ -68,7 +81,7 @@ public final class Game {
 
             ui.endInput();
 
-            if (state == state.MENU) {
+            if (state == State.MENU) {
                 if (glfwGetKey(window.handle(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
                     menu.menuBack();
                 }
@@ -77,12 +90,23 @@ public final class Game {
             if (state == State.PLAY) {
                 // TODO: 플레이 구현
                 if (glfwGetKey(window.handle(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+                    World w = world();
+                    if (w != null) {
+                        try {
+                            WorldStorage.saveDirtyChunks(w);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    System.out.println("[SAVE] quitToMenu called");
+                    System.out.println("[SAVE] world=" + (world() == null ? "null" : world().info().name()));
                     state = State.MENU;
+                    setWorld(null);
                     glfwSetInputMode(window.handle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                 }
             }
 
-            renderer3D.render(dt);
+            renderer3D.render(dt, world());
 
             // UI frame
             ui.beginDraw(window.width(), window.height());

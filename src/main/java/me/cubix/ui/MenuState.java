@@ -1,5 +1,7 @@
 package me.cubix.ui;
 
+import me.cubix.world.World;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

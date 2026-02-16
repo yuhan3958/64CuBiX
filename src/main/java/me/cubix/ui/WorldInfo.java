@@ -1,3 +1,5 @@
 package me.cubix.ui;
 
-public record WorldInfo(String id, String name, long seed) {}
+import java.nio.file.Path;
+
+public record WorldInfo(String id, String name, long seed, Path dir) {}
