@@ -12,7 +12,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.nuklear.Nuklear.*;
 
 public final class GameMenu {
-    public final MenuState s;
+    private final MenuState s;
     private final MenuActions actions;
     private final WorldInfoStorage storage = new WorldInfoStorage();
 
@@ -324,5 +324,9 @@ public final class GameMenu {
     public Void menuBack() {
         s.screen = MenuScreen.MAIN;
         return null;
+    }
+
+    public MenuState getState() {
+        return s;
     }
 }
