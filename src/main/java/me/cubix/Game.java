@@ -91,7 +91,7 @@ public final class Game {
         while (!window.shouldClose()) {
             float dt=1/60f;
 
-            float playerHeight=menu.s.playerHeight/100f;
+            float playerHeight=menu.getState().playerHeight/100f;
 
             ui.beginInput();
 
