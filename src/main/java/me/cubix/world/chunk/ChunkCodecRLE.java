@@ -1,7 +1,5 @@
 package me.cubix.world.chunk;
 
-import me.cubix.world.chunk.Chunk;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;

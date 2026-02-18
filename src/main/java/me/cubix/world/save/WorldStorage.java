@@ -1,7 +1,7 @@
 package me.cubix.world.save;
 
-import me.cubix.ui.WorldInfo;
 import me.cubix.world.World;
+import me.cubix.world.WorldInfo;
 import me.cubix.world.chunk.Chunk;
 import me.cubix.world.chunk.ChunkCodecRLE;
 import me.cubix.world.chunk.ChunkPos;

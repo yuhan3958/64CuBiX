@@ -5,7 +5,6 @@ import me.cubix.gfx.mesh.ChunkMesh;
 import me.cubix.world.World;
 import me.cubix.world.chunk.Chunk;
 
-
 import java.util.HashMap;
 import java.util.Map;
 

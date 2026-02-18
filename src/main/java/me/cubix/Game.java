@@ -3,17 +3,18 @@ package me.cubix;
 import me.cubix.core.Window;
 import me.cubix.gameplay.Player;
 import me.cubix.gfx.Renderer3D;
-import me.cubix.phys.PlayerPhysicsState;
-import me.cubix.ui.*;
+import me.cubix.ui.GameMenu;
+import me.cubix.ui.MenuActions;
+import me.cubix.ui.MenuState;
+import me.cubix.ui.NuklearGL3;
 import me.cubix.world.World;
+import me.cubix.world.WorldInfo;
 import org.joml.Vector3f;
 
 import java.io.IOException;
 
 import static me.cubix.world.save.WorldStorage.saveDirtyChunks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.nuklear.Nuklear.NK_KEY_RIGHT;
-import static org.lwjgl.nuklear.Nuklear.nk_input_key;
 
 public final class Game {
 

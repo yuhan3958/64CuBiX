@@ -4,7 +4,6 @@ import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWCharCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.nuklear.*;
-import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
@@ -19,7 +18,6 @@ import java.util.Objects;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.nuklear.Nuklear.*;
 import static org.lwjgl.opengl.GL33.*;
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 public final class NuklearGL3 {
 

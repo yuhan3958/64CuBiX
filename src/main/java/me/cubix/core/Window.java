@@ -3,7 +3,7 @@ package me.cubix.core;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL.*;
+import static org.lwjgl.opengl.GL.createCapabilities;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public final class Window {

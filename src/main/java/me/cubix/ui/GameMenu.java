@@ -1,12 +1,15 @@
 package me.cubix.ui;
 
 import me.cubix.world.World;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.nuklear.*;
-import org.lwjgl.system.MemoryStack;
-import java.nio.ByteBuffer;
+import me.cubix.world.WorldInfo;
+import me.cubix.world.WorldInfoStorage;
 import me.cubix.world.block.BlockId;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.nuklear.NkContext;
+import org.lwjgl.nuklear.NkRect;
+import org.lwjgl.system.MemoryStack;
 
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.nuklear.Nuklear.*;

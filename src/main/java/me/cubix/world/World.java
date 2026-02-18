@@ -1,16 +1,12 @@
 package me.cubix.world;
 
-import me.cubix.ui.WorldInfo;
 import me.cubix.world.chunk.Chunk;
 import me.cubix.world.chunk.ChunkPos;
 import me.cubix.world.save.WorldStorage;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class World {
     private final Map<ChunkPos, Chunk> chunks = new HashMap<>();
