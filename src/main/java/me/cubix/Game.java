@@ -89,7 +89,7 @@ public final class Game {
 
     private void loop() {
         while (!window.shouldClose()) {
-            float dt=1/60f;
+            float dt=1/64f;
 
             float playerHeight=menu.getState().playerHeight/100f;
 
