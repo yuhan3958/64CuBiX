@@ -39,6 +39,10 @@ public final class Camera {
 
     public void resetMouse() { firstMouse = true; }
 
+    public Vector3f front() {
+        return new Vector3f(front);
+    }
+
     public void update(Window window, float dt) {
         long h = window.handle();
 

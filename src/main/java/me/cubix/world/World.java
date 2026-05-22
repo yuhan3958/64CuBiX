@@ -2,6 +2,7 @@ package me.cubix.world;
 
 import me.cubix.world.chunk.Chunk;
 import me.cubix.world.chunk.ChunkPos;
+import me.cubix.world.block.BlockId;
 import me.cubix.world.save.WorldStorage;
 
 import java.io.IOException;
@@ -63,6 +64,16 @@ public final class World {
 
     public int chunkSize() {
         return Chunk.S;
+    }
+
+    public float topSolidSpawnY(int x, int z) {
+        for (int y = 255; y >= -64; y--) {
+            short id = getBlock(x, y, z);
+            if (id != BlockId.AIR && id != BlockId.WATER) {
+                return y + 1.0f;
+            }
+        }
+        return 64.0f;
     }
 }
 

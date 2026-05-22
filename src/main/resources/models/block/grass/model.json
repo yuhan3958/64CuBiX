@@ -1,0 +1,12 @@
+{
+  "layers": [
+    { "name": "top", "texture": "/textures/blocks/grass_top.png" },
+    { "name": "side", "texture": "/textures/blocks/grass_side.png" },
+    { "name": "bottom", "texture": "/textures/blocks/dirt.png" }
+  ],
+  "faces": {
+    "top": "top",
+    "side": "side",
+    "bottom": "bottom"
+  }
+}

@@ -19,12 +19,15 @@ public final class ChunkMesh {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-        int stride = 5 * Float.BYTES;
+        int stride = 6 * Float.BYTES;
         glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L);
         glEnableVertexAttribArray(0);
 
         glVertexAttribPointer(1, 2, GL_FLOAT, false, stride, 3L * Float.BYTES);
         glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 1, GL_FLOAT, false, stride, 5L * Float.BYTES);
+        glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
     }

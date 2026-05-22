@@ -1,0 +1,8 @@
+{
+  "layers": [
+    { "name": "all", "texture": "/textures/blocks/water.png" }
+  ],
+  "faces": {
+    "all": "all"
+  }
+}

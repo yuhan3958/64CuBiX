@@ -6,7 +6,7 @@ public final class CollisionResolver {
 
     public static void stepPlayer(World world, PlayerPhysicsState p, float dt) {
         // 1) 중력
-        p.vel.y -= 30.0f * dt; // 중력 상수는 취향. 30 정도면 게임 느낌 나옴
+        p.vel.y -= 30.0f * dt;
 
         // 2) 이동량
         float dx = p.vel.x * dt;

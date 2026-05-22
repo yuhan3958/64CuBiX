@@ -1,9 +1,7 @@
 package me.cubix.ui;
 
-import me.cubix.world.World;
 import me.cubix.world.WorldInfo;
 import me.cubix.world.WorldInfoStorage;
-import me.cubix.world.block.BlockId;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.nuklear.NkContext;
 import org.lwjgl.nuklear.NkRect;
@@ -11,6 +9,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
 
 import static org.lwjgl.nuklear.Nuklear.*;
 
@@ -18,6 +17,7 @@ public final class GameMenu {
     private final MenuState s;
     private final MenuActions actions;
     private final WorldInfoStorage storage = new WorldInfoStorage();
+    private final SettingsStorage settingsStorage = new SettingsStorage();
 
     private final ByteBuffer nameBuf = BufferUtils.createByteBuffer(64);
     private final IntBuffer nameLen = BufferUtils.createIntBuffer(1);
@@ -25,11 +25,14 @@ public final class GameMenu {
     private final ByteBuffer seedBuf = BufferUtils.createByteBuffer(64);
     private final IntBuffer seedLen = BufferUtils.createIntBuffer(1);
 
-    public final static String BACK="돌아가기";
-
     public GameMenu(MenuState state, MenuActions actions) {
         this.s = state;
         this.actions = actions;
+        settingsStorage.loadInto(s);
+
+        if (s.newWorldName == null || s.newWorldName.isBlank()) {
+            s.newWorldName = t("world.default_name");
+        }
 
         putString(nameBuf, nameLen, s.newWorldName);
         putString(seedBuf, seedLen, s.newWorldSeed);
@@ -44,7 +47,7 @@ public final class GameMenu {
             float x = (w - ww) * 0.5f;
             float y = (h - hh) * 0.45f;
 
-            nk_begin(ctx, "메뉴",
+            nk_begin(ctx, t("menu.window"),
                     nk_rect(x, y, ww, hh, rect),
                     NK_WINDOW_BORDER | NK_WINDOW_TITLE | NK_WINDOW_NO_SCROLLBAR);
 
@@ -70,27 +73,27 @@ public final class GameMenu {
     private void drawMain(NkContext ctx) {
         nk_layout_row_dynamic(ctx, 36, 1);
 
-        if (nk_button_label(ctx, "싱글플레이")) {
+        if (nk_button_label(ctx, t("menu.singleplayer"))) {
             refreshWorlds();
             s.screen = MenuScreen.SINGLEPLAYER;
         }
-        if (nk_button_label(ctx, "멀티플레이")) {
+        if (nk_button_label(ctx, t("menu.multiplayer"))) {
             s.screen = MenuScreen.MULTIPLAYER;
         }
-        if (nk_button_label(ctx, "설정")) {
+        if (nk_button_label(ctx, t("menu.options"))) {
             s.screen = MenuScreen.OPTIONS;
         }
-        if (nk_button_label(ctx, "종료")) {
+        if (nk_button_label(ctx, t("menu.quit"))) {
             actions.quit();
         }
     }
 
     private void drawSingle(NkContext ctx) {
         nk_layout_row_dynamic(ctx, 22, 1);
-        nk_label(ctx, "세계", NK_TEXT_LEFT);
+        nk_label(ctx, t("menu.world"), NK_TEXT_LEFT);
 
         nk_layout_row_dynamic(ctx, 240, 1);
-        nk_group_begin(ctx, "세계 목록", NK_WINDOW_BORDER);
+        nk_group_begin(ctx, t("menu.world_list"), NK_WINDOW_BORDER);
         {
             nk_layout_row_dynamic(ctx, 22, 1);
             try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -98,43 +101,40 @@ public final class GameMenu {
                     WorldInfo wi = s.worlds.get(i);
 
                     ByteBuffer selected = stack.malloc(1);
-                    selected.put(0, (byte) ((i == s.selectedWorld) ? 1 : 0));
+                    selected.put(0, (byte)((i == s.selectedWorld) ? 1 : 0));
 
-                    if (nk_selectable_label(ctx, wi.name(), NK_TEXT_LEFT, selected)) {
-                        // nk_selectable_label은 내부에서 selected 값을 토글할 수 있음
-                    }
+                    nk_selectable_label(ctx, wi.name(), NK_TEXT_LEFT, selected);
                     if (selected.get(0) != 0) {
                         s.selectedWorld = i;
                     }
                 }
             }
-
         }
         nk_group_end(ctx);
 
         boolean hasSel = s.selectedWorld >= 0 && s.selectedWorld < s.worlds.size();
 
         nk_layout_row_dynamic(ctx, 36, 2);
-        if (nk_button_label(ctx, "플레이") && hasSel) {
+        if (nk_button_label(ctx, t("menu.play")) && hasSel) {
             actions.startSingleplayer(s.worlds.get(s.selectedWorld));
         }
-        if (nk_button_label(ctx, "만들기")) {
+        if (nk_button_label(ctx, t("menu.create"))) {
             s.screen = MenuScreen.CREATE_WORLD;
         }
 
         nk_layout_row_dynamic(ctx, 36, 2);
-        if (nk_button_label(ctx, "삭제") && hasSel) {
+        if (nk_button_label(ctx, t("menu.delete")) && hasSel) {
             s.pendingDelete = s.selectedWorld;
             s.screen = MenuScreen.CONFIRM_DELETE;
         }
-        if (nk_button_label(ctx, BACK)) {
+        if (nk_button_label(ctx, t("menu.back"))) {
             s.screen = MenuScreen.MAIN;
         }
     }
 
     private void drawCreate(NkContext ctx) {
         nk_layout_row_dynamic(ctx, 22, 1);
-        nk_label(ctx, "세계 이름", NK_TEXT_LEFT);
+        nk_label(ctx, t("menu.world_name"), NK_TEXT_LEFT);
 
         ensureNullTerminated(nameBuf, nameLen);
         ensureNullTerminated(seedBuf, seedLen);
@@ -143,7 +143,7 @@ public final class GameMenu {
         nk_edit_string(ctx, NK_EDIT_FIELD, nameBuf, nameLen, 63, null);
 
         nk_layout_row_dynamic(ctx, 22, 1);
-        nk_label(ctx, "시드", NK_TEXT_LEFT);
+        nk_label(ctx, t("menu.seed"), NK_TEXT_LEFT);
 
         ensureNullTerminated(nameBuf, nameLen);
         ensureNullTerminated(seedBuf, seedLen);
@@ -153,33 +153,23 @@ public final class GameMenu {
 
         nk_layout_row_dynamic(ctx, 36, 2);
 
-        if (nk_button_label(ctx, "만들기")) {
+        if (nk_button_label(ctx, t("menu.create"))) {
             String name = getString(nameBuf, nameLen).trim();
             String seedText = getString(seedBuf, seedLen).trim();
-            if (name.isEmpty()) name = "이름 없는 세계";
+            if (name.isEmpty()) name = t("world.unnamed");
 
             long seed = parseSeed(seedText);
 
             try {
-                WorldInfo info = storage.createWorld(name, seed);
+                storage.createWorld(name, seed);
                 refreshWorlds();
-                World world = new World(seed, info);
-                for (int z = -16; z <= 16; z++) {
-                    StringBuilder sb = new StringBuilder();
-                    for (int x = -32; x <= 32; x++) {
-                        int y = 80;
-                        while (y > 0 && world.getBlock(x, y, z) == BlockId.AIR) y--;
-                        sb.append(y < 10 ? " ." : y < 20 ? " -" : y < 30 ? " +" : " #");
-                    }
-                    System.out.println(sb);
-                }
                 s.screen = MenuScreen.SINGLEPLAYER;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        if (nk_button_label(ctx, "취소")) {
+        if (nk_button_label(ctx, t("menu.cancel"))) {
             s.screen = MenuScreen.SINGLEPLAYER;
         }
     }
@@ -191,13 +181,13 @@ public final class GameMenu {
         }
 
         nk_layout_row_dynamic(ctx, 24, 1);
-        nk_label(ctx, "월드를 삭제하시겠습니까?", NK_TEXT_LEFT);
+        nk_label(ctx, t("menu.delete_confirm_question"), NK_TEXT_LEFT);
 
         nk_layout_row_dynamic(ctx, 24, 1);
         nk_label(ctx, target, NK_TEXT_LEFT);
 
         nk_layout_row_dynamic(ctx, 36, 2);
-        if (nk_button_label(ctx, "예")) {
+        if (nk_button_label(ctx, t("menu.yes"))) {
             try {
                 if (s.pendingDelete >= 0 && s.pendingDelete < s.worlds.size()) {
                     storage.deleteWorld(s.worlds.get(s.pendingDelete));
@@ -209,40 +199,63 @@ public final class GameMenu {
                 e.printStackTrace();
             }
         }
-        if (nk_button_label(ctx, "아니요")) {
+        if (nk_button_label(ctx, t("menu.no"))) {
             s.pendingDelete = -1;
             s.screen = MenuScreen.SINGLEPLAYER;
         }
     }
 
     private void drawOptions(NkContext ctx) {
-        nk_layout_row_dynamic(ctx, 24, 1);
-        s.showCelsius = nk_check_label(ctx, "온도를 섭씨로 보기", s.showCelsius);
+        boolean oldShowCelsius = s.showCelsius;
+        float oldMouseSensitivity = s.mouseSensitivity;
+        int oldPlayerHeight = s.playerHeight;
+        String oldLanguage = s.language;
 
         nk_layout_row_dynamic(ctx, 24, 1);
-        nk_label(ctx, "마우스 민감도", NK_TEXT_LEFT);
+        s.showCelsius = nk_check_label(ctx, t("options.show_celsius"), s.showCelsius);
+
+        nk_layout_row_dynamic(ctx, 24, 1);
+        nk_label(ctx, t("options.mouse_sensitivity"), NK_TEXT_LEFT);
 
         nk_layout_row_dynamic(ctx, 24, 1);
         s.mouseSensitivity = nk_slide_float(ctx, 0.02f, s.mouseSensitivity, 0.40f, 0.01f);
 
         nk_layout_row_dynamic(ctx, 24, 1);
-        nk_label(ctx, "플레이어 키: " + s.playerHeight, NK_TEXT_LEFT);
+        nk_label(ctx, t("options.player_height") + ": " + s.playerHeight, NK_TEXT_LEFT);
+
         nk_layout_row_dynamic(ctx, 24, 1);
         s.playerHeight = nk_slide_int(ctx, 100, s.playerHeight, 200, 5);
 
+        nk_layout_row_dynamic(ctx, 24, 1);
+        nk_label(ctx, t("options.language"), NK_TEXT_LEFT);
+
+        nk_layout_row_dynamic(ctx, 30, 2);
+        if (nk_button_label(ctx, languageButtonLabel(I18n.KO_KR, "options.language_ko"))) {
+            s.language = I18n.KO_KR;
+        }
+        if (nk_button_label(ctx, languageButtonLabel(I18n.EN_US, "options.language_en"))) {
+            s.language = I18n.EN_US;
+        }
+
+        if (oldShowCelsius != s.showCelsius
+                || Float.compare(oldMouseSensitivity, s.mouseSensitivity) != 0
+                || oldPlayerHeight != s.playerHeight
+                || !oldLanguage.equals(s.language)) {
+            settingsStorage.save(s);
+        }
 
         nk_layout_row_dynamic(ctx, 36, 1);
-        if (nk_button_label(ctx, BACK)) {
+        if (nk_button_label(ctx, t("menu.back"))) {
             s.screen = MenuScreen.MAIN;
         }
     }
 
     private void drawMulti(NkContext ctx) {
         nk_layout_row_dynamic(ctx, 24, 1);
-        nk_label(ctx, "(Multiplayer menu placeholder)", NK_TEXT_LEFT);
+        nk_label(ctx, t("menu.multiplayer_placeholder"), NK_TEXT_LEFT);
 
         nk_layout_row_dynamic(ctx, 36, 1);
-        if (nk_button_label(ctx, BACK)) {
+        if (nk_button_label(ctx, t("menu.back"))) {
             s.screen = MenuScreen.MAIN;
         }
     }
@@ -260,15 +273,24 @@ public final class GameMenu {
         }
     }
 
-    private static String title(MenuScreen sc) {
+    private String title(MenuScreen sc) {
         return switch (sc) {
-            case MAIN -> "메인 메뉴";
-            case SINGLEPLAYER -> "싱글플레이";
-            case CREATE_WORLD -> "세계 만들기";
-            case CONFIRM_DELETE -> "삭제 확인";
-            case MULTIPLAYER -> "멀티플레이";
-            case OPTIONS -> "설정";
+            case MAIN -> t("menu.main");
+            case SINGLEPLAYER -> t("menu.singleplayer");
+            case CREATE_WORLD -> t("menu.create_world");
+            case CONFIRM_DELETE -> t("menu.confirm_delete");
+            case MULTIPLAYER -> t("menu.multiplayer");
+            case OPTIONS -> t("menu.options");
         };
+    }
+
+    private String languageButtonLabel(String language, String labelKey) {
+        String prefix = s.language.equals(language) ? "* " : "";
+        return prefix + t(labelKey);
+    }
+
+    private String t(String key) {
+        return I18n.t(s.language, key);
     }
 
     private static long parseSeed(String s) {
@@ -286,18 +308,14 @@ public final class GameMenu {
         return h;
     }
 
-    private static void setBuf(byte[] buf, String s) {
-        for (int i = 0; i < buf.length; i++) buf[i] = 0;
-        byte[] b = s.getBytes();
-        System.arraycopy(b, 0, buf, 0, Math.min(b.length, buf.length));
-    }
-
     private static void putString(ByteBuffer buf, IntBuffer len, String s) {
         buf.clear();
-        byte[] bytes = s.getBytes();
+        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
         int n = Math.min(bytes.length, buf.capacity() - 1);
-        buf.put(0, bytes, 0, n);
-        buf.put(n, (byte) 0);
+        for (int i = 0; i < n; i++) {
+            buf.put(i, bytes[i]);
+        }
+        buf.put(n, (byte)0);
         len.put(0, n);
     }
 
@@ -308,7 +326,7 @@ public final class GameMenu {
 
         byte[] out = new byte[n];
         for (int i = 0; i < n; i++) out[i] = buf.get(i);
-        return new String(out);
+        return new String(out, StandardCharsets.UTF_8);
     }
 
     private static void ensureNullTerminated(ByteBuffer buf, IntBuffer len) {
@@ -321,7 +339,7 @@ public final class GameMenu {
             len.put(0, n);
         }
 
-        buf.put(n, (byte) 0);
+        buf.put(n, (byte)0);
     }
 
     public Void menuBack() {

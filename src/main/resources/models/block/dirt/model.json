@@ -1,0 +1,8 @@
+{
+  "layers": [
+    { "name": "all", "texture": "/textures/blocks/dirt.png" }
+  ],
+  "faces": {
+    "all": "all"
+  }
+}
