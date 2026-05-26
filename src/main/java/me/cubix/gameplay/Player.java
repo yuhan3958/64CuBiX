@@ -1,4 +1,4 @@
-package me.cubix.gameplay;
+﻿package me.cubix.gameplay;
 
 import me.cubix.world.World;
 import me.cubix.world.block.BlockId;

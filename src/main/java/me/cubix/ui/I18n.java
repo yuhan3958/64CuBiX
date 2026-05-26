@@ -1,4 +1,4 @@
-package me.cubix.ui;
+﻿package me.cubix.ui;
 
 import java.io.IOException;
 import java.io.InputStream;

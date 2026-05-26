@@ -1,4 +1,4 @@
-package me.cubix.gfx.model;
+﻿package me.cubix.gfx.model;
 
 import org.lwjgl.BufferUtils;
 

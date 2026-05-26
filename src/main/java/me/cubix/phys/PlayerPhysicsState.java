@@ -1,4 +1,4 @@
-package me.cubix.phys;
+﻿package me.cubix.phys;
 
 import org.joml.Vector3f;
 

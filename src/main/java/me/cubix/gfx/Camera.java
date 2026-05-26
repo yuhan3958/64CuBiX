@@ -1,4 +1,4 @@
-package me.cubix.gfx;
+﻿package me.cubix.gfx;
 
 import me.cubix.core.Window;
 import org.joml.Matrix4f;

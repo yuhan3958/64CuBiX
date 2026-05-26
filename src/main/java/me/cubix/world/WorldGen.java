@@ -1,4 +1,4 @@
-package me.cubix.world;
+﻿package me.cubix.world;
 
 import me.cubix.world.block.BlockId;
 import me.cubix.world.chunk.Chunk;
@@ -45,8 +45,6 @@ public final class WorldGen {
         if (y >= height - 3) return BlockId.DIRT;
         return BlockId.STONE;
     }
-
-    // -------- noise ----------
     private double fbm2(double x, double z, int oct) {
         double sum = 0, amp = 1, freq = 1;
         double norm = 0;
@@ -58,8 +56,6 @@ public final class WorldGen {
         }
         return sum / norm; // 0..1 근처
     }
-
-    // 0..1
     private double valueNoise2(double x, double z) {
         int x0 = (int)Math.floor(x);
         int z0 = (int)Math.floor(z);
@@ -86,12 +82,10 @@ public final class WorldGen {
         h ^= (h >>> 33);
         h *= 0xc4ceb9fe1a85ec53L;
         h ^= (h >>> 33);
-        // 0..1
         return ((h >>> 11) & ((1L << 53) - 1)) / (double)(1L << 53);
     }
 
     private static double smooth(double t) {
-        // smoothstep
         return t * t * (3 - 2 * t);
     }
 

@@ -1,4 +1,4 @@
-package me.cubix.phys;
+﻿package me.cubix.phys;
 
 public final class AABBUtil {
     public static AABB playerAabb(PlayerPhysicsState p) {

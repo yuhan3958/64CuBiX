@@ -1,4 +1,4 @@
-package me.cubix.phys;
+﻿package me.cubix.phys;
 
 import me.cubix.world.World;
 
@@ -15,16 +15,10 @@ public final class CollisionResolver {
 
         // 3) 충돌 (축 분리)
         p.onGround = false;
-
-        // X
         if (dx != 0) dx = collideAxis(world, p, dx, 0, 0);
         p.pos.x += dx;
-
-        // Y
         if (dy != 0) dy = collideAxis(world, p, 0, dy, 0);
         p.pos.y += dy;
-
-        // Z
         if (dz != 0) dz = collideAxis(world, p, 0, 0, dz);
         p.pos.z += dz;
     }

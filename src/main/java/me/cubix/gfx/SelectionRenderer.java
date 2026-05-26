@@ -1,4 +1,4 @@
-package me.cubix.gfx;
+﻿package me.cubix.gfx;
 
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;

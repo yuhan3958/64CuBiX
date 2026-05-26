@@ -1,4 +1,4 @@
-package me.cubix.ui;
+﻿package me.cubix.ui;
 
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWCharCallback;
@@ -36,19 +36,13 @@ public final class NuklearGL3 {
 
     private int uniformTex;
     private int uniformProj;
-
-    // buffers
     private ByteBuffer vertices;
     private ByteBuffer elements;
-
-    // config
     private NkConvertConfig convertConfig;
 
     // input: char callback
     private GLFWCharCallback charCallback;
     private GLFWScrollCallback scrollCallback;
-
-    // size
     private int fbWidth, fbHeight;
 
     public NuklearGL3(long window) {
@@ -56,8 +50,6 @@ public final class NuklearGL3 {
     }
 
     public NkContext ctx() { return ctx; }
-
-    //backSpace
     private boolean backDown = false;
 
     private boolean backFiredOnce = false;
@@ -65,8 +57,6 @@ public final class NuklearGL3 {
     private double backPressedAt = 0.0;
 
     private double backLastRepeatAt = 0.0;
-
-    //Left
     private boolean LeftDown = false;
 
     private boolean LeftFiredOnce = false;
@@ -74,8 +64,6 @@ public final class NuklearGL3 {
     private double LeftPressedAt = 0.0;
 
     private double LeftLastRepeatAt = 0.0;
-
-    //Right
     private boolean RightDown = false;
 
     private boolean RightFiredOnce = false;
@@ -162,7 +150,6 @@ public final class NuklearGL3 {
 
 
     private void setupGL() {
-        // shaders
         String vertex =
                 "#version 330 core\n" +
                         "layout(location=0) in vec2 Position;\n" +
@@ -208,8 +195,6 @@ public final class NuklearGL3 {
 
         uniformTex = glGetUniformLocation(prog, "Texture");
         uniformProj = glGetUniformLocation(prog, "ProjMtx");
-
-        // buffers
         vao = glGenVertexArrays();
         vbo = glGenBuffers();
         ebo = glGenBuffers();
@@ -338,8 +323,6 @@ public final class NuklearGL3 {
         nk_buffer_init_fixed(ebuf, elements);
 
         nk_convert(ctx, cmds, vbuf, ebuf, convertConfig);
-
-        // setup state
         int lastProgram = glGetInteger(GL_CURRENT_PROGRAM);
         int lastTexture = glGetInteger(GL_TEXTURE_BINDING_2D);
         int lastArrayBuffer = glGetInteger(GL_ARRAY_BUFFER_BINDING);
@@ -375,15 +358,11 @@ public final class NuklearGL3 {
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-        // upload buffers
         int vsize = (int) nk_buffer_total(vbuf);
         int esize = (int) nk_buffer_total(ebuf);
 
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.position(0).limit(vsize));
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, elements.position(0).limit(esize));
-
-        // Draw
         long offset = 0;
 
         for (NkDrawCommand cmd = nk__draw_begin(ctx, cmds);
@@ -408,8 +387,6 @@ public final class NuklearGL3 {
             offset += (long) cmd.elem_count() * 2L;
         }
         nk__draw_end(ctx, cmds);
-
-        // restore state
         if (!lastBlend) glDisable(GL_BLEND);
         glBlendFunc(lastBlendSrc, lastBlendDst);
         glBlendEquation(lastBlendEq);

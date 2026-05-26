@@ -1,4 +1,4 @@
-package me.cubix.gfx;
+﻿package me.cubix.gfx;
 
 import me.cubix.core.Window;
 import me.cubix.gfx.mesh.ChunkMesh;

@@ -1,4 +1,4 @@
-package me.cubix.world.block;
+﻿package me.cubix.world.block;
 
 public final class BlockId {
     public static final short AIR = 0;

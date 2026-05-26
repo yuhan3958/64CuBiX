@@ -1,4 +1,4 @@
-package me.cubix.core;
+﻿package me.cubix.core;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 

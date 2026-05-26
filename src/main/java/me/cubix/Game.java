@@ -1,4 +1,4 @@
-package me.cubix;
+﻿package me.cubix;
 
 import me.cubix.core.Window;
 import me.cubix.gameplay.Player;
@@ -38,8 +38,6 @@ public final class Game {
     private Renderer3D renderer3D;
 
     private State state = State.MENU;
-
-    // UI
     private NuklearGL3 ui;
     private final MenuState menuState = new MenuState();
     private GameMenu menu;

@@ -1,4 +1,4 @@
-package me.cubix.world.chunk;
+﻿package me.cubix.world.chunk;
 
 import java.io.*;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package me.cubix.gfx;
+﻿package me.cubix.gfx;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;

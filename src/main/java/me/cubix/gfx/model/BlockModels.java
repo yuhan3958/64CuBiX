@@ -1,4 +1,4 @@
-package me.cubix.gfx.model;
+﻿package me.cubix.gfx.model;
 
 import me.cubix.world.block.BlockId;
 

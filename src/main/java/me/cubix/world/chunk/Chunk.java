@@ -1,4 +1,4 @@
-package me.cubix.world.chunk;
+﻿package me.cubix.world.chunk;
 
 public final class Chunk {
 
