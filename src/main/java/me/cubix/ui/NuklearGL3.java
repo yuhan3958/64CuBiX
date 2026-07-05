@@ -1,4 +1,4 @@
-﻿package me.cubix.ui;
+package me.cubix.ui;
 
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWCharCallback;
@@ -29,7 +29,6 @@ public final class NuklearGL3 {
     private NkFontAtlas atlas;
     private int fontTex;
 
-    // GL objects
     private int vao, vbo, ebo;
     private int prog;
     private int vertSh, fragSh;
@@ -40,7 +39,6 @@ public final class NuklearGL3 {
     private ByteBuffer elements;
     private NkConvertConfig convertConfig;
 
-    // input: char callback
     private GLFWCharCallback charCallback;
     private GLFWScrollCallback scrollCallback;
     private int fbWidth, fbHeight;
@@ -81,7 +79,7 @@ public final class NuklearGL3 {
         nk_init(ctx, ALLOCATOR, null);
         nk_buffer_init(cmds, ALLOCATOR, 4 * 1024);
 
-        // Clipboard (optional but nice)
+        // Nuklear text edits use GLFW clipboard callbacks for copy and paste.
         ctx.clip().copy((handle, text, len) -> {
             if (len == 0) return;
             ByteBuffer str = MemoryUtil.memByteBuffer(text, len);
@@ -203,13 +201,13 @@ public final class NuklearGL3 {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-        int vsz = 4 * 1024 * 1024;    // 4MB vertex
-        int esz = 2 * 1024 * 1024;    // 2MB element
+        int vsz = 4 * 1024 * 1024;
+        int esz = 2 * 1024 * 1024;
         glBufferData(GL_ARRAY_BUFFER, vsz, GL_STREAM_DRAW);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, esz, GL_STREAM_DRAW);
 
-        // Vertex layout = NkDrawVertex {float2 pos, float2 uv, ubyte4 col}
-        int stride = 2 * 4 + 2 * 4 + 4; // 20 bytes
+        // Matches Nuklear's NkDrawVertex layout: float2 pos, float2 uv, ubyte4 color.
+        int stride = 2 * 4 + 2 * 4 + 4;
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
@@ -257,7 +255,7 @@ public final class NuklearGL3 {
         convertConfig.vertex_alignment(4);
         convertConfig.tex_null().set(nullTex);
 
-        // AA off로 시작 (성능/선명함). 나중에 켜도 됨
+        // Disable Nuklear anti-aliasing for sharper pixel-aligned UI rendering.
         convertConfig.circle_segment_count(22);
         convertConfig.curve_segment_count(22);
         convertConfig.arc_segment_count(22);
@@ -271,7 +269,7 @@ public final class NuklearGL3 {
     }
 
     public void endInput() {
-        // mouse + keyboard 상태를 여기서 ctx에 넣기
+        // GLFW input is copied into Nuklear once per frame before widgets are drawn.
         try (MemoryStack stack = MemoryStack.stackPush()) {
             DoubleBuffer mx = stack.mallocDouble(1);
             DoubleBuffer my = stack.mallocDouble(1);
@@ -316,13 +314,14 @@ public final class NuklearGL3 {
     }
 
     private void render() {
-        // Convert Nuklear draw commands to buffers
+        // Convert Nuklear draw commands into the fixed vertex/index buffers.
         NkBuffer vbuf = NkBuffer.create();
         NkBuffer ebuf = NkBuffer.create();
         nk_buffer_init_fixed(vbuf, vertices);
         nk_buffer_init_fixed(ebuf, elements);
 
         nk_convert(ctx, cmds, vbuf, ebuf, convertConfig);
+        // Preserve caller GL state because UI rendering runs after the world pass.
         int lastProgram = glGetInteger(GL_CURRENT_PROGRAM);
         int lastTexture = glGetInteger(GL_TEXTURE_BINDING_2D);
         int lastArrayBuffer = glGetInteger(GL_ARRAY_BUFFER_BINDING);
@@ -441,12 +440,11 @@ public final class NuklearGL3 {
         boolean down = glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS;
         double t = glfwGetTime();
 
-        final double initialDelay = 0.35;   // 길게 누를 때 첫 반복까지 기다림(초)
-        final double repeatInterval = 0.03; // 반복 간격(초) -> 0.03이면 초당 약 33자
+        final double initialDelay = 0.35;
+        final double repeatInterval = 0.03;
 
         if (down) {
             if (!backDown) {
-                // 딱 1번만 삭제
                 backDown = true;
                 backFiredOnce = true;
                 backPressedAt = t;
@@ -457,7 +455,7 @@ public final class NuklearGL3 {
                 return;
             }
 
-            // initialDelay 이후부터 repeatInterval마다 1번씩만 삭제
+            // GLFW exposes held keys as state, so synthesize Nuklear repeat presses explicitly.
             if ((t - backPressedAt) >= initialDelay) {
                 if ((t - backLastRepeatAt) >= repeatInterval) {
                     backLastRepeatAt = t;
@@ -475,12 +473,11 @@ public final class NuklearGL3 {
         boolean down = glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
         double t = glfwGetTime();
 
-        final double initialDelay = 0.35;   // 길게 누를 때 첫 반복까지 기다림(초)
-        final double repeatInterval = 0.03; // 반복 간격(초) -> 0.03이면 초당 약 33자
+        final double initialDelay = 0.35;
+        final double repeatInterval = 0.03;
 
         if (down) {
             if (!LeftDown) {
-                // 딱 1번만 삭제
                 LeftDown = true;
                 LeftFiredOnce = true;
                 LeftPressedAt = t;
@@ -491,7 +488,7 @@ public final class NuklearGL3 {
                 return;
             }
 
-            // initialDelay 이후부터 repeatInterval마다 1번씩만 삭제
+            // GLFW exposes held keys as state, so synthesize Nuklear repeat presses explicitly.
             if ((t - LeftPressedAt) >= initialDelay) {
                 if ((t - LeftLastRepeatAt) >= repeatInterval) {
                     LeftLastRepeatAt = t;

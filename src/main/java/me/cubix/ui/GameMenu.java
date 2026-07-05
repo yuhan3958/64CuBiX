@@ -1,4 +1,4 @@
-﻿package me.cubix.ui;
+package me.cubix.ui;
 
 import me.cubix.world.WorldInfo;
 import me.cubix.world.WorldInfoStorage;

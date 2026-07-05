@@ -1,4 +1,4 @@
-﻿package me.cubix.world;
+package me.cubix.world;
 
 import java.nio.file.Path;
 

@@ -1,4 +1,4 @@
-﻿package me.cubix.gfx.model;
+package me.cubix.gfx.model;
 
 import org.lwjgl.BufferUtils;
 
@@ -26,6 +26,7 @@ public final class ChunkBuilder {
         float y0 = y, y1 = y + 1;
         float z0 = z, z1 = z + 1;
 
+        // Vertex order is consistent per face so culling can be enabled later.
         switch (face) {
             case POS_X -> quad(x1, y0, z0, x1, y0, z1, x1, y1, z1, x1, y1, z0, layer);
             case NEG_X -> quad(x0, y0, z1, x0, y0, z0, x0, y1, z0, x0, y1, z1, layer);

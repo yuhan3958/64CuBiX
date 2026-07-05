@@ -1,4 +1,4 @@
-﻿package me.cubix.world.chunk;
+package me.cubix.world.chunk;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -17,7 +17,7 @@ public final class ChunkCodecRLE {
             out.writeInt(cy);
             out.writeInt(cz);
 
-            // payload: (short id, short run)
+            // Payload is a compact stream of block id and run length pairs.
             int total = Chunk.S * Chunk.S * Chunk.S;
             int i = 0;
             while (i < total) {

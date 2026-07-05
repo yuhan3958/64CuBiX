@@ -1,4 +1,4 @@
-﻿package me.cubix.gameplay;
+package me.cubix.gameplay;
 
 import me.cubix.world.World;
 import me.cubix.world.block.BlockId;
@@ -22,6 +22,7 @@ public final class Player {
 
     public boolean onGround = false;
 
+    // Resolves movement per axis so sliding along block edges remains stable.
     public void moveAndCollide(World world, Vector3f delta, float height) {
         if (world == null) {
             pos.add(delta);
@@ -55,6 +56,7 @@ public final class Player {
     public boolean isInWater(World world, float height) {
         if (world == null) return false;
 
+        // Water affects movement if any block overlapping the player AABB is water.
         float minX = pos.x - halfWidth;
         float maxX = pos.x + halfWidth;
         float minY = pos.y;
@@ -82,6 +84,7 @@ public final class Player {
     private float moveAxis(World world, float x, float y, float z, float d, int axis, float height) {
         if (d == 0f) return axis == 0 ? x : axis == 1 ? y : z;
 
+        // Build the destination AABB first, then clamp it against every solid block it overlaps.
         float nx = x, ny = y, nz = z;
         if (axis == 0) nx += d;
         if (axis == 1) ny += d;

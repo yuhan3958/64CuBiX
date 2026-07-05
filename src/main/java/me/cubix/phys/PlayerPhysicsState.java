@@ -1,4 +1,4 @@
-﻿package me.cubix.phys;
+package me.cubix.phys;
 
 import org.joml.Vector3f;
 
@@ -7,7 +7,6 @@ public final class PlayerPhysicsState {
     public final Vector3f vel = new Vector3f();
     public boolean onGround = false;
 
-    // 플레이어 히트박스(발바닥 기준): 폭 0.6, 키 1.8
     public float halfW = 0.3f;
     public float height = 1.8f;
 
@@ -20,7 +19,7 @@ public final class PlayerPhysicsState {
 
     private static boolean isSolid(short id) {
         return id != me.cubix.world.block.BlockId.AIR
-                && id != me.cubix.world.block.BlockId.WATER; // 물은 일단 비고체로
+                && id != me.cubix.world.block.BlockId.WATER;
     }
 
     static int floorToBlock(float v) {

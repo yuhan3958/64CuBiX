@@ -1,4 +1,4 @@
-﻿package me.cubix.world.save;
+package me.cubix.world.save;
 
 import me.cubix.world.World;
 import me.cubix.world.WorldInfo;

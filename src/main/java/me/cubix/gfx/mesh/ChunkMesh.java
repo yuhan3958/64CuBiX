@@ -1,4 +1,4 @@
-﻿package me.cubix.gfx.mesh;
+package me.cubix.gfx.mesh;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;

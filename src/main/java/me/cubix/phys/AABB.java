@@ -1,4 +1,4 @@
-﻿package me.cubix.phys;
+package me.cubix.phys;
 
 public record AABB(float minX, float minY, float minZ,
                    float maxX, float maxY, float maxZ) {

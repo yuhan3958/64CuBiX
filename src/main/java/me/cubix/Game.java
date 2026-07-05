@@ -1,4 +1,4 @@
-﻿package me.cubix;
+package me.cubix;
 
 import me.cubix.core.Window;
 import me.cubix.gameplay.Player;
@@ -26,7 +26,7 @@ public final class Game {
     private boolean jumpDown = false;
     private boolean escapeDown = false;
 
-    private World world; // 현재 플레이 중인 월드. 메뉴 상태면 null
+    private World world;
 
     public World world() { return world; }
 
@@ -114,7 +114,8 @@ public final class Game {
 
             renderer3D.render(dt, world, state == State.PLAY, state == State.PLAY);
 
-            desiredDelta.set(renderer3D.camera.position).sub(lastCam); // 카메라가 가고 싶었던 이동량
+            // Camera input is converted into player movement, then collision decides the final position.
+            desiredDelta.set(renderer3D.camera.position).sub(lastCam);
 
             desiredDelta.y=0f;
             if (state != State.PLAY) {
@@ -169,7 +170,6 @@ public final class Game {
                 lastCam.set(renderer3D.camera.position);
             }
 
-            // UI frame
             ui.beginDraw(window.width(), window.height());
 
             if (state == State.MENU) {

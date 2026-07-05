@@ -1,4 +1,4 @@
-﻿package me.cubix.world;
+package me.cubix.world;
 
 import me.cubix.world.block.BlockId;
 import me.cubix.world.chunk.Chunk;
@@ -30,7 +30,7 @@ public final class WorldGen {
     }
 
     private short sampleBlock(int x, int y, int z) {
-        // 지표 높이(2D FBM)
+        // Height is sampled from 2D FBM so each vertical column remains terrain-like.
         double h = 24.0 + 18.0 * fbm2(x * 0.01, z * 0.01, 5);
         int height = (int)Math.floor(h);
 
@@ -40,7 +40,6 @@ public final class WorldGen {
             return (y <= sea) ? BlockId.WATER : BlockId.AIR;
         }
 
-        // 지표 아래 층 구성
         if (y == height) return BlockId.GRASS;
         if (y >= height - 3) return BlockId.DIRT;
         return BlockId.STONE;
@@ -54,7 +53,7 @@ public final class WorldGen {
             amp *= 0.5;
             freq *= 2.0;
         }
-        return sum / norm; // 0..1 근처
+        return sum / norm;
     }
     private double valueNoise2(double x, double z) {
         int x0 = (int)Math.floor(x);

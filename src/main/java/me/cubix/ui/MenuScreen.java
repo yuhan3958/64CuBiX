@@ -1,4 +1,4 @@
-﻿package me.cubix.ui;
+package me.cubix.ui;
 
 public enum MenuScreen {
     MAIN,

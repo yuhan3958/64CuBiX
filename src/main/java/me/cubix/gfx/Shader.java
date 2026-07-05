@@ -1,4 +1,4 @@
-﻿package me.cubix.gfx;
+package me.cubix.gfx;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -61,7 +61,6 @@ public final class Shader {
     private int uniform(String name) {
         int loc = glGetUniformLocation(programId, name);
         if (loc < 0) {
-            // 실수 방지용: 유니폼 이름 틀리면 바로 알게
             throw new IllegalArgumentException("Uniform not found: " + name);
         }
         return loc;

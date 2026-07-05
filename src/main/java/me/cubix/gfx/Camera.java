@@ -1,4 +1,4 @@
-﻿package me.cubix.gfx;
+package me.cubix.gfx;
 
 import me.cubix.core.Window;
 import org.joml.Matrix4f;
@@ -15,9 +15,9 @@ public final class Camera {
     float yaw = -90.0f;
     float pitch = 0.0f;
 
-    private float moveSpeed = 6.0f;     // units/sec
+    private float moveSpeed = 6.0f;
     private float sprintMul = 2.0f;
-    private float mouseSens = 0.12f;    // deg per pixel
+    private float mouseSens = 0.12f;
 
     private float fovRad = (float)Math.toRadians(70.0f);
     private float near = 0.1f;
@@ -33,7 +33,6 @@ public final class Camera {
     public void setPerspective(float fovRad, float aspect, float near) {
         this.fovRad = fovRad;
         this.near = near;
-        // far는 기본 1000 유지 (원하면 setter 추가)
         proj.identity().perspective(this.fovRad, aspect, this.near, this.far);
     }
 
@@ -46,7 +45,6 @@ public final class Camera {
     public void update(Window window, float dt) {
         long h = window.handle();
 
-        // --- mouse look ---
         double[] mx = new double[1];
         double[] my = new double[1];
         glfwGetCursorPos(h, mx, my);
@@ -58,7 +56,7 @@ public final class Camera {
         }
 
         double dx = mx[0] - lastX;
-        double dy = lastY - my[0]; // y 반전
+        double dy = lastY - my[0];
 
         lastX = mx[0];
         lastY = my[0];
@@ -81,11 +79,10 @@ public final class Camera {
         right.set(front).cross(0, 1, 0).normalize();
         up.set(right).cross(front).normalize();
 
-        // --- keyboard move ---
         float speed = moveSpeed * dt;
         if (glfwGetKey(h, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) speed *= sprintMul;
 
-        // 수평 이동(지면 고정) 버전
+        // Horizontal movement is flattened; gravity and jumping are handled by player physics.
         Vector3f flatFront = new Vector3f(front.x, 0, front.z);
         if (flatFront.lengthSquared() > 0) flatFront.normalize();
 
@@ -94,12 +91,10 @@ public final class Camera {
         if (glfwGetKey(h, GLFW_KEY_D) == GLFW_PRESS) position.fma(speed, right);
         if (glfwGetKey(h, GLFW_KEY_A) == GLFW_PRESS) position.fma(-speed, right);
 
-        // 점프/하강(원하면)
         if (glfwGetKey(h, GLFW_KEY_SPACE) == GLFW_PRESS) position.y += speed;
         if (glfwGetKey(h, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) position.y -= speed;
     }
 
-    // ★ 매 프레임 호출해서 view/proj 갱신
     public void rebuildMatrices(Window window) {
         float aspect = (float)window.width() / (float)window.height();
         proj.identity().perspective(fovRad, aspect, near, far);

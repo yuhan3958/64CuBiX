@@ -1,4 +1,4 @@
-﻿package me.cubix.world;
+package me.cubix.world;
 
 import me.cubix.world.chunk.Chunk;
 import me.cubix.world.chunk.ChunkPos;

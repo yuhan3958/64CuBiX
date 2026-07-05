@@ -1,4 +1,4 @@
-﻿package me.cubix.gfx;
+package me.cubix.gfx;
 
 import me.cubix.core.Window;
 import me.cubix.gfx.mesh.ChunkMesh;
@@ -92,6 +92,7 @@ public final class Renderer3D {
     }
 
     public static long key(int cx, int cy, int cz) {
+        // Pack signed chunk coordinates into fixed-width fields for mesh cache keys.
         return (((long)cx) & 0x1FFFFFL) << 42
                 | (((long)cy) & 0x1FFFFFL) << 21
                 | (((long)cz) & 0x1FFFFFL);
@@ -154,6 +155,7 @@ public final class Renderer3D {
 
     private void rebuildChunkMesh(World world, ChunkMesh mesh, int cx, int cy, int cz) {
         int s = Chunk.S;
+        // Worst case is every block face visible; hidden faces are skipped while building.
         int maxFaces = s * s * s * 6;
         ChunkBuilder builder = new ChunkBuilder(maxFaces);
 
@@ -190,6 +192,7 @@ public final class Renderer3D {
             int gx, int gy, int gz,
             int lx, int ly, int lz
     ) {
+        // Emit only faces adjacent to air, which keeps chunk meshes compact.
         if (world.getBlock(gx + 1, gy, gz) == BlockId.AIR) addFace(builder, model, ChunkBuilder.POS_X, lx, ly, lz);
         if (world.getBlock(gx - 1, gy, gz) == BlockId.AIR) addFace(builder, model, ChunkBuilder.NEG_X, lx, ly, lz);
         if (world.getBlock(gx, gy + 1, gz) == BlockId.AIR) addFace(builder, model, ChunkBuilder.POS_Y, lx, ly, lz);
@@ -211,6 +214,7 @@ public final class Renderer3D {
         int lastY = Integer.MIN_VALUE;
         int lastZ = Integer.MIN_VALUE;
 
+        // Step through the view ray and report the first non-passable block.
         for (float d = 0f; d <= maxDistance; d += step) {
             int x = fastFloor(origin.x + direction.x * d);
             int y = fastFloor(origin.y + direction.y * d);
